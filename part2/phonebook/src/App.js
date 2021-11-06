@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Filter from './Filter';
 import PersonForm from './PersonForm';
-import Numbers from './Numbers';
+import Persons from './Persons';
 
 const App = () => {
   const [persons, setPersons] = useState([
@@ -33,14 +33,11 @@ const App = () => {
       alert(`${newName} is already added to phonebook`);
       return;
     }
+
     setPersons([...persons, { name: newName, phoneNumber: newPhoneNumber }]);
     setNewPhoneNumber('');
     setNewName('');
   };
-
-  const filteredPersons = persons.filter((person) =>
-    person.name.toLowerCase().includes(newFilter.trim().toLowerCase())
-  );
 
   return (
     <div>
@@ -58,7 +55,7 @@ const App = () => {
         addPerson={addPerson}
       ></PersonForm>
       <h2>Numbers</h2>
-      <Numbers filteredPersons={filteredPersons} />
+      <Persons persons={persons} newFilter={newFilter} />
     </div>
   );
 };
