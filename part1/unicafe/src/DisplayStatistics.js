@@ -16,7 +16,7 @@ const Statistics = ({ reviews }) => {
       <tbody>
         <StatisticsLine text="good" value={good} />
         <StatisticsLine text="neutral" value={neutral} />
-        <StatisticsLine text="bar" value={bad} />
+        <StatisticsLine text="bad" value={bad} />
         <StatisticsLine text="all" value={reviewsCount} />
         <StatisticsLine text="average" value={reviewsAvg} />
         <StatisticsLine text="positive" value={reviewsPosRatio} />
