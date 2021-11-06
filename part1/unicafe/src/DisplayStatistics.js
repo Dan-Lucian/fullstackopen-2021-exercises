@@ -1,23 +1,27 @@
-import Display from './Display';
+import StatisticsLine from './StatisticsLine';
 
 const Statistics = ({ reviews }) => {
   const { good, neutral, bad } = reviews;
 
   const reviewsCount = good + neutral + bad;
-  const reviewsAvg = reviewsCount ? (good - bad) / reviewsCount : 'no reviews';
-  const reviewsPosRatio = reviewsCount
-    ? (good / reviewsCount) * 100 + ' %'
-    : 'no reviews';
+  const reviewsAvg = (good - bad) / reviewsCount;
+  const reviewsPosRatio = (good / reviewsCount) * 100 + ' %';
+
+  if (reviewsCount === 0) {
+    return <p>No feedback given</p>;
+  }
 
   return (
-    <>
-      <Display text={`good ${good}`} />
-      <Display text={`neutral ${neutral}`} />
-      <Display text={`bad ${bad}`} />
-      <Display text={`all ${reviewsCount}`} />
-      <Display text={`average ${reviewsAvg}`} />
-      <Display text={`positive ${reviewsPosRatio}`} />
-    </>
+    <table>
+      <tbody>
+        <StatisticsLine text="good" value={good} />
+        <StatisticsLine text="neutral" value={neutral} />
+        <StatisticsLine text="bar" value={bad} />
+        <StatisticsLine text="all" value={reviewsCount} />
+        <StatisticsLine text="average" value={reviewsAvg} />
+        <StatisticsLine text="positive" value={reviewsPosRatio} />
+      </tbody>
+    </table>
   );
 };
 
