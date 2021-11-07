@@ -3,12 +3,15 @@ import Filter from './components/Filter';
 import PersonForm from './components/PersonForm';
 import Persons from './components/Persons';
 import contacts from './services/contacts';
+import Notification from './components/Notification';
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newFilter, setNewFilter] = useState('');
   const [newName, setNewName] = useState('');
   const [newPhoneNumber, setNewPhoneNumber] = useState('');
+  const [notificationMessage, setNotificationMessage] = useState(null);
+  const [notificationType, setNotificationType] = useState('success');
 
   useEffect(() => {
     contacts.getAll().then((contacts) => setPersons(contacts));
@@ -39,19 +42,33 @@ const App = () => {
             `replace the new number with the new one?`
         )
       ) {
-        contacts.update(foundCopy.id, newContact).then((returnedContact) => {
-          setPersons(
-            persons
-              .filter((person) => person.id !== foundCopy.id)
-              .concat(returnedContact)
-          );
-          setNewPhoneNumber('');
-          setNewName('');
-          console.log('contact updated successfully');
-        });
-        return;
+        contacts
+          .update(foundCopy.id, newContact)
+          .then((returnedContact) => {
+            setPersons(
+              persons
+                .filter((person) => person.id !== foundCopy.id)
+                .concat(returnedContact)
+            );
+            setNewPhoneNumber('');
+            setNewName('');
+            setNotificationType('success');
+            setNotificationMessage(`Updated ${newContact.name}`);
+            setTimeout(() => {
+              setNotificationMessage(null);
+            }, 3000);
+          })
+          .catch(() => {
+            setPersons(persons.filter((person) => person.id !== foundCopy.id));
+            setNotificationType('error');
+            setNotificationMessage(
+              `Information of ${newContact.name} has already been removed from server `
+            );
+            setTimeout(() => {
+              setNotificationMessage(null);
+            }, 3000);
+          });
       }
-      console.log('update canceled');
       return;
     }
 
@@ -59,6 +76,11 @@ const App = () => {
       setPersons(persons.concat(returnedContact));
       setNewPhoneNumber('');
       setNewName('');
+      setNotificationType('success');
+      setNotificationMessage(`Added ${newContact.name}`);
+      setTimeout(() => {
+        setNotificationMessage(null);
+      }, 3000);
     });
   };
 
@@ -72,6 +94,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notificationMessage} type={notificationType} />
       <Filter
         newFilter={newFilter}
         handleChangeFilter={handleChangeFilter}
