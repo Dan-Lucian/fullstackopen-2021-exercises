@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import Filter from './Filter';
-import PersonForm from './PersonForm';
-import Persons from './Persons';
+import Filter from './components/Filter';
+import PersonForm from './components/PersonForm';
+import Persons from './components/Persons';
+import contacts from './services/contacts';
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -11,9 +11,7 @@ const App = () => {
   const [newPhoneNumber, setNewPhoneNumber] = useState('');
 
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then((res) => setPersons(res.data));
+    contacts.getAll().then((contacts) => setPersons(contacts));
   }, []);
 
   const handleChangeFilter = (e) => {
@@ -31,14 +29,44 @@ const App = () => {
   const addPerson = (e) => {
     e.preventDefault();
 
-    if (persons.find((person) => person.name === newName)) {
-      alert(`${newName} is already added to phonebook`);
+    const newContact = { name: newName, phoneNumber: newPhoneNumber };
+    const foundCopy = persons.find((person) => person.name === newName);
+
+    if (foundCopy) {
+      if (
+        window.confirm(
+          `${newName} is already added to phonebook, ` +
+            `replace the new number with the new one?`
+        )
+      ) {
+        contacts.update(foundCopy.id, newContact).then((returnedContact) => {
+          setPersons(
+            persons
+              .filter((person) => person.id !== foundCopy.id)
+              .concat(returnedContact)
+          );
+          setNewPhoneNumber('');
+          setNewName('');
+          console.log('contact updated successfully');
+        });
+        return;
+      }
+      console.log('update canceled');
       return;
     }
 
-    setPersons([...persons, { name: newName, phoneNumber: newPhoneNumber }]);
-    setNewPhoneNumber('');
-    setNewName('');
+    contacts.create(newContact).then((returnedContact) => {
+      setPersons(persons.concat(returnedContact));
+      setNewPhoneNumber('');
+      setNewName('');
+    });
+  };
+
+  const removeContact = (contact) => {
+    if (!window.confirm(`Delete ${contact.name} ?`)) return;
+
+    contacts.remove(contact.id).then(() => console.log('contact deleted'));
+    setPersons(persons.filter((person) => person.id !== contact.id));
   };
 
   return (
@@ -57,7 +85,11 @@ const App = () => {
         addPerson={addPerson}
       ></PersonForm>
       <h2>Numbers</h2>
-      <Persons persons={persons} newFilter={newFilter} />
+      <Persons
+        persons={persons}
+        newFilter={newFilter}
+        removeContact={removeContact}
+      />
     </div>
   );
 };
