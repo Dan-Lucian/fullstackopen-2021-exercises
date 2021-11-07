@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import Form from './components/Form';
-import Countries from './components/Countries';
+import Content from './components/Content';
 
 const App = () => {
   const [country, setCountry] = useState('');
@@ -36,7 +36,7 @@ const App = () => {
     <>
       <Form country={country} handleCountryChange={handleCountryChange} />
 
-      <Countries
+      <Content
         countries={countries}
         showSelectedCountry={showSelectedCountry}
         fetchError={fetchError}

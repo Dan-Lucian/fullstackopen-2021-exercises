@@ -3,7 +3,7 @@ import CountriesList from './CountriesList';
 import CountryInfo from './CountryInfo';
 import Error from './Error';
 
-const Countries = ({ countries, showSelectedCountry, fetchError }) => {
+const Content = ({ countries, showSelectedCountry, fetchError }) => {
   if (fetchError) return <Error error={fetchError} />;
 
   return (
@@ -21,4 +21,4 @@ const Countries = ({ countries, showSelectedCountry, fetchError }) => {
   );
 };
 
-export default Countries;
+export default Content;
