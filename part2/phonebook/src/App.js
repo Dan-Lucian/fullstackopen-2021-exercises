@@ -56,32 +56,39 @@ const App = () => {
             setNotificationMessage(`Updated ${newContact.name}`);
             setTimeout(() => {
               setNotificationMessage(null);
-            }, 3000);
+            }, 5000);
           })
-          .catch(() => {
-            setPersons(persons.filter((person) => person.id !== foundCopy.id));
+          .catch((err) => {
             setNotificationType('error');
-            setNotificationMessage(
-              `Information of ${newContact.name} has already been removed from server `
-            );
+            setNotificationMessage(`${err.response.data.error}`);
             setTimeout(() => {
               setNotificationMessage(null);
-            }, 3000);
+            }, 5000);
           });
       }
       return;
     }
 
-    contacts.create(newContact).then((returnedContact) => {
-      setPersons(persons.concat(returnedContact));
-      setNewPhoneNumber('');
-      setNewName('');
-      setNotificationType('success');
-      setNotificationMessage(`Added ${newContact.name}`);
-      setTimeout(() => {
-        setNotificationMessage(null);
-      }, 3000);
-    });
+    contacts
+      .create(newContact)
+      .then((returnedContact) => {
+        setPersons(persons.concat(returnedContact));
+        setNewPhoneNumber('');
+        setNewName('');
+        setNotificationType('success');
+        setNotificationMessage(`Added ${newContact.name}`);
+        setTimeout(() => {
+          setNotificationMessage(null);
+        }, 5000);
+        console.log(newContact);
+      })
+      .catch((err) => {
+        setNotificationType('error');
+        setNotificationMessage(`${err.response.data.error}`);
+        setTimeout(() => {
+          setNotificationMessage(null);
+        }, 5000);
+      });
   };
 
   const removeContact = (contact) => {
