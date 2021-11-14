@@ -1,3 +1,3 @@
 # Note
 
- - this exercise was modified to work with the backend built in the part3.
+ - This branch is for the part2.
