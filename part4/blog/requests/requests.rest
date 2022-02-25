@@ -1,0 +1,15 @@
+GET http://localhost:8000/api/blogs
+###
+
+GET http://localhost:8000/api/blogs/62190cc2cbe16c0b30916ca0
+###
+
+POST  http://localhost:8000/api/blogs
+Content-Type: application/json
+
+{
+  "author": "author",
+  "title": "title",
+  "url": "text",
+  "upvotes": 3
+}
