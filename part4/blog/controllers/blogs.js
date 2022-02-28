@@ -3,30 +3,26 @@ import Blog from '../models/blog.js';
 
 const routerBlogs = express.Router();
 
-routerBlogs.get('/', (request, response) => {
-  Blog.find({}).then((blogs) => {
-    response.json(blogs);
-  });
+routerBlogs.get('/', async (request, response) => {
+  const blogs = await Blog.find({});
+  response.json(blogs);
 });
 
-routerBlogs.get('/:id', (request, response, next) => {
-  Blog.findById(request.params.id)
-    .then((blog) => {
-      if (blog) {
-        response.json(blog);
-      } else {
-        response.status(404).end();
-      }
-    })
-    .catch((error) => next(error));
+routerBlogs.get('/:id', async (request, response, next) => {
+  const blog = await Blog.findById(request.params.id);
+
+  if (blog) {
+    response.json(blog);
+  } else {
+    response.status(404).end();
+  }
 });
 
-routerBlogs.post('/', (request, response) => {
+routerBlogs.post('/', async (request, response) => {
   const blog = new Blog(request.body);
 
-  blog.save().then((result) => {
-    response.status(201).json(result);
-  });
+  const blogSaved = await blog.save();
+  response.status(201).json(blogSaved);
 });
 
 export default routerBlogs;
