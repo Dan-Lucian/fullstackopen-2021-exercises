@@ -35,4 +35,19 @@ routerBlogs.delete('/:id', async (request, response) => {
   response.status(204).end();
 });
 
+routerBlogs.put('/:id', async (request, response) => {
+  const blogNew = {
+    author: request.body.author,
+    title: request.body.title,
+    url: request.body.url,
+    upvotes: request.body.upvotes,
+    likes: request.body.likes,
+  };
+
+  const blogUpdated = await Blog.findByIdAndUpdate(request.params.id, blogNew, {
+    new: true,
+  });
+  response.json(blogUpdated);
+});
+
 export default routerBlogs;

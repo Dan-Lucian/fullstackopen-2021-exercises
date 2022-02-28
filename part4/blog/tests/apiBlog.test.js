@@ -93,7 +93,7 @@ test('should respond 400 to missing title & url', async () => {
 });
 
 describe('Deletion of a note', () => {
-  test.only('should success with status 204 if valid id', async () => {
+  test('should success with status 204 if valid id', async () => {
     const blogsAtStart = await blogsInDb();
     const blogToDelete = blogsAtStart[0];
 
@@ -104,6 +104,32 @@ describe('Deletion of a note', () => {
 
     const blogsFound = await Blog.find(blogToDelete);
     expect(blogsFound).toHaveLength(0);
+  });
+});
+
+describe('Updating of a note', () => {
+  test.only('should successfuly update a blog', async () => {
+    const blogNew = {
+      author: 'Author 3',
+      title: 'Title 3',
+      url: 'url 3',
+      upvotes: 3,
+    };
+
+    const blogsAtStart = await blogsInDb();
+    const blogToUpdate = blogsAtStart[0];
+
+    await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .send(blogNew)
+      .expect(200)
+      .expect('Content-Type', /application\/json/);
+
+    const blogsAtEnd = await blogsInDb();
+    expect(blogsAtEnd).toHaveLength(blogsInitial.length);
+
+    const blogsFound = await Blog.find(blogNew);
+    expect(blogsFound).toHaveLength(1);
   });
 });
 
