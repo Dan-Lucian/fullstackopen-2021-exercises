@@ -83,13 +83,28 @@ test('should default to 0 missing likes', async () => {
   expect(blogInDb[0].likes).toBe(0);
 });
 
-test.only('should respond 400 to missing title & url', async () => {
+test('should respond 400 to missing title & url', async () => {
   const blogToAdd = {
     author: 'Author 3',
     upvotes: 3,
   };
 
   await api.post('/api/blogs').send(blogToAdd).expect(400);
+});
+
+describe('Deletion of a note', () => {
+  test.only('should success with status 204 if valid id', async () => {
+    const blogsAtStart = await blogsInDb();
+    const blogToDelete = blogsAtStart[0];
+
+    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+
+    const blogsAtEnd = await blogsInDb();
+    expect(blogsAtEnd).toHaveLength(blogsInitial.length - 1);
+
+    const blogsFound = await Blog.find(blogToDelete);
+    expect(blogsFound).toHaveLength(0);
+  });
 });
 
 afterAll(() => {

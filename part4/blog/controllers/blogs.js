@@ -30,4 +30,9 @@ routerBlogs.post('/', async (request, response) => {
   response.status(201).json(blogSaved);
 });
 
+routerBlogs.delete('/:id', async (request, response) => {
+  await Blog.findByIdAndDelete(request.params.id);
+  response.status(204).end();
+});
+
 export default routerBlogs;
