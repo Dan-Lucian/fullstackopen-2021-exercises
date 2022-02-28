@@ -5,6 +5,7 @@ const schemaBlog = new mongoose.Schema({
   title: String,
   url: String,
   upvotes: Number,
+  likes: { type: Number, default: 0 },
 });
 
 schemaBlog.set('toJSON', {

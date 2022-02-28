@@ -35,7 +35,7 @@ test('blog should have an id property', async () => {
   expect(blog.id).toBeDefined();
 });
 
-test.only('should add a blog to the db', async () => {
+test('should add a blog to the db', async () => {
   const blogToAdd = {
     author: 'Author 3',
     title: 'Title 3',
@@ -63,6 +63,24 @@ test.only('should add a blog to the db', async () => {
 
   const upvotesBlogs = blogsAtEnd.map((blog) => blog.upvotes);
   expect(upvotesBlogs).toContain(blogToAdd.upvotes);
+});
+
+test.only('should default to 0 missing likes', async () => {
+  const blogToAdd = {
+    author: 'Author 3',
+    title: 'Title 3',
+    url: 'url 3',
+    upvotes: 3,
+  };
+
+  await api
+    .post('/api/blogs')
+    .send(blogToAdd)
+    .expect(201)
+    .expect('Content-Type', /application\/json/);
+
+  const blogInDb = await Blog.find(blogToAdd);
+  expect(blogInDb[0].likes).toBe(0);
 });
 
 afterAll(() => {
