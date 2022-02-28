@@ -1,3 +1,5 @@
+import Blog from '../models/blog';
+
 const blogsInitial = [
   {
     author: 'Author 1',
@@ -13,4 +15,9 @@ const blogsInitial = [
   },
 ];
 
-export { blogsInitial };
+const blogsInDb = async () => {
+  const blogs = await Blog.find({});
+  return blogs.map((blog) => blog.toJSON());
+};
+
+export { blogsInitial, blogsInDb };
