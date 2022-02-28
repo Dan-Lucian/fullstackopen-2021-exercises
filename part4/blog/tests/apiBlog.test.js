@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import supertest from 'supertest';
 import Blog from '../models/blog.js';
 import app from '../app.js';
-import { blogsInitial, blogsInDb } from './helperTests';
+import { blogsInitial, blogsInDb, getANonExistingId } from './helperTests';
 
 const api = supertest(app);
 
@@ -15,85 +15,126 @@ beforeEach(async () => {
   await Promise.all(arrayPromises);
 });
 
-test('should return json format', () => {
-  api
-    .get('/api/blogs')
-    .expect(200)
-    .expect('Content-Type', /application\/json/);
+describe('when there is initially some notes saved', () => {
+  test('blog is returned as json', () => {
+    api
+      .get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/);
+  });
+
+  test('all blogs are returned', async () => {
+    const response = await api.get('/api/blogs');
+
+    expect(response.body).toHaveLength(blogsInitial.length);
+  });
+
+  test('there is a specific note inside', async () => {
+    const response = await api.get('/api/blogs');
+
+    const titles = response.body.map((r) => r.title);
+
+    expect(titles).toContain(blogsInitial[0].title);
+  });
+
+  test('blogs should have an id property', async () => {
+    const response = await api.get('/api/blogs');
+    const blog = response.body[0];
+
+    expect(blog.id).toBeDefined();
+  });
 });
 
-test('should return correct number of blogs', async () => {
-  const response = await api.get('/api/blogs');
+describe('Viewing a specific blog', () => {
+  test('succeeds if id valid', async () => {
+    const blogsAtStart = await blogsInDb();
 
-  expect(response.body).toHaveLength(blogsInitial.length);
+    const blogToView = blogsAtStart[0];
+
+    const blogReceived = await api
+      .get(`/api/blogs/${blogToView.id}`)
+      .expect(200)
+      .expect('Content-Type', /application\/json/);
+
+    const blogProcessed = JSON.parse(JSON.stringify(blogToView));
+
+    expect(blogReceived.body).toEqual(blogProcessed);
+  });
+
+  test('fails with 404 if id not found in db', async () => {
+    const idValidNonexistent = await getANonExistingId();
+
+    await api.get(`/api/blogs/${idValidNonexistent}`).expect(404);
+  });
+
+  test('fails with 400 if id invalid', async () => {
+    const idInvalid = '1iou1iuo3iuo1iuo22';
+
+    await api.get(`/api/blogs/${idInvalid}`).expect(400);
+  });
 });
 
-test('blog should have an id property', async () => {
-  const response = await api.get('/api/blogs');
-  const blog = response.body[0];
+describe('Addition of a note', () => {
+  test('succeeds with valid data', async () => {
+    const blogToAdd = {
+      author: 'Author 3',
+      title: 'Title 3',
+      url: 'url 3',
+      upvotes: 3,
+    };
 
-  expect(blog.id).toBeDefined();
-});
+    await api
+      .post('/api/blogs')
+      .send(blogToAdd)
+      .expect(201)
+      .expect('Content-Type', /application\/json/);
 
-test('should add a blog to the db', async () => {
-  const blogToAdd = {
-    author: 'Author 3',
-    title: 'Title 3',
-    url: 'url 3',
-    upvotes: 3,
-  };
+    const blogsAtEnd = await blogsInDb();
+    expect(blogsAtEnd).toHaveLength(blogsInitial.length + 1);
 
-  await api
-    .post('/api/blogs')
-    .send(blogToAdd)
-    .expect(201)
-    .expect('Content-Type', /application\/json/);
+    const authorsBlogs = blogsAtEnd.map((blog) => blog.author);
+    expect(authorsBlogs).toContain(blogToAdd.author);
 
-  const blogsAtEnd = await blogsInDb();
-  expect(blogsAtEnd).toHaveLength(blogsInitial.length + 1);
+    const titlesBlogs = blogsAtEnd.map((blog) => blog.title);
+    expect(titlesBlogs).toContain(blogToAdd.title);
 
-  const authorsBlogs = blogsAtEnd.map((blog) => blog.author);
-  expect(authorsBlogs).toContain(blogToAdd.author);
+    const urlsBlogs = blogsAtEnd.map((blog) => blog.url);
+    expect(urlsBlogs).toContain(blogToAdd.url);
 
-  const titlesBlogs = blogsAtEnd.map((blog) => blog.title);
-  expect(titlesBlogs).toContain(blogToAdd.title);
+    const upvotesBlogs = blogsAtEnd.map((blog) => blog.upvotes);
+    expect(upvotesBlogs).toContain(blogToAdd.upvotes);
+  });
 
-  const urlsBlogs = blogsAtEnd.map((blog) => blog.url);
-  expect(urlsBlogs).toContain(blogToAdd.url);
+  test('defaults likes to 0', async () => {
+    const blogToAdd = {
+      author: 'Author 3',
+      title: 'Title 3',
+      url: 'url 3',
+      upvotes: 3,
+    };
 
-  const upvotesBlogs = blogsAtEnd.map((blog) => blog.upvotes);
-  expect(upvotesBlogs).toContain(blogToAdd.upvotes);
-});
+    await api
+      .post('/api/blogs')
+      .send(blogToAdd)
+      .expect(201)
+      .expect('Content-Type', /application\/json/);
 
-test('should default to 0 missing likes', async () => {
-  const blogToAdd = {
-    author: 'Author 3',
-    title: 'Title 3',
-    url: 'url 3',
-    upvotes: 3,
-  };
+    const blogInDb = await Blog.find(blogToAdd);
+    expect(blogInDb[0].likes).toBe(0);
+  });
 
-  await api
-    .post('/api/blogs')
-    .send(blogToAdd)
-    .expect(201)
-    .expect('Content-Type', /application\/json/);
+  test('fails with 400 if data invalid', async () => {
+    const blogToAdd = {
+      author: 'Author 3',
+      upvotes: 3,
+    };
 
-  const blogInDb = await Blog.find(blogToAdd);
-  expect(blogInDb[0].likes).toBe(0);
-});
-
-test('should respond 400 to missing title & url', async () => {
-  const blogToAdd = {
-    author: 'Author 3',
-    upvotes: 3,
-  };
-
-  await api.post('/api/blogs').send(blogToAdd).expect(400);
+    await api.post('/api/blogs').send(blogToAdd).expect(400);
+  });
 });
 
 describe('Deletion of a note', () => {
-  test('should success with status 204 if valid id', async () => {
+  test('succeeds with 204 if valid id', async () => {
     const blogsAtStart = await blogsInDb();
     const blogToDelete = blogsAtStart[0];
 
@@ -108,7 +149,7 @@ describe('Deletion of a note', () => {
 });
 
 describe('Updating of a note', () => {
-  test.only('should successfuly update a blog', async () => {
+  test('suceeds by returning the update blog', async () => {
     const blogNew = {
       author: 'Author 3',
       title: 'Title 3',
