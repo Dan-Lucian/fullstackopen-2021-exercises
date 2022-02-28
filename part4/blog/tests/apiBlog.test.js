@@ -65,7 +65,7 @@ test('should add a blog to the db', async () => {
   expect(upvotesBlogs).toContain(blogToAdd.upvotes);
 });
 
-test.only('should default to 0 missing likes', async () => {
+test('should default to 0 missing likes', async () => {
   const blogToAdd = {
     author: 'Author 3',
     title: 'Title 3',
@@ -81,6 +81,15 @@ test.only('should default to 0 missing likes', async () => {
 
   const blogInDb = await Blog.find(blogToAdd);
   expect(blogInDb[0].likes).toBe(0);
+});
+
+test.only('should respond 400 to missing title & url', async () => {
+  const blogToAdd = {
+    author: 'Author 3',
+    upvotes: 3,
+  };
+
+  await api.post('/api/blogs').send(blogToAdd).expect(400);
 });
 
 afterAll(() => {
