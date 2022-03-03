@@ -52,7 +52,7 @@ describe('when there is initially some notes saved', () => {
     expect(response.body).toHaveLength(blogsInitial.length);
   });
 
-  test('there is a specific note inside', async () => {
+  test('there is a specific blog inside', async () => {
     const response = await api.get('/api/blogs');
 
     const titles = response.body.map((r) => r.title);
@@ -97,7 +97,7 @@ describe('Viewing a specific blog', () => {
   });
 });
 
-describe('Addition of a note', () => {
+describe('Addition of a blog', () => {
   test('succeeds if token & data valid', async () => {
     const blogToAdd = {
       author: 'Author 3',
@@ -106,7 +106,7 @@ describe('Addition of a note', () => {
       upvotes: 3,
     };
 
-    await api
+    const response = await api
       .post('/api/blogs')
       .set('Authorization', tokenValid)
       .send(blogToAdd)
@@ -116,7 +116,7 @@ describe('Addition of a note', () => {
     const blogsAtEnd = await blogsInDb();
     expect(blogsAtEnd).toHaveLength(blogsInitial.length + 1);
 
-    const user = await User.findOne(blogToAdd);
+    const user = await User.findById(response.body.user);
     const blogInDb = await Blog.findOne(blogToAdd);
     expect(blogInDb.user).toEqual(user._id);
     expect(blogInDb.author).toEqual(blogToAdd.author);
@@ -188,7 +188,7 @@ describe('Addition of a note', () => {
   });
 });
 
-describe('Deletion of a note', () => {
+describe('Deletion of a blog', () => {
   test('succeeds with 204 if both id & token valid', async () => {
     const blogsAtStart = await blogsInDb();
 
@@ -251,7 +251,7 @@ describe('Deletion of a note', () => {
   });
 });
 
-describe('Updating of a note', () => {
+describe('Updating of a blog', () => {
   test('suceeds by returning the update blog', async () => {
     const blogNew = {
       author: 'Author 3',
