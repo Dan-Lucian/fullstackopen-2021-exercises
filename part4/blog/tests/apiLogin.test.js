@@ -21,7 +21,7 @@ describe('Login', () => {
     await user.save();
   });
 
-  test.only('succeedes by returning a jwt if valid login data', async () => {
+  test('succeedes by returning a jwt if valid login data', async () => {
     const userToLogin = {
       username: 'admin',
       password: 'admin',
