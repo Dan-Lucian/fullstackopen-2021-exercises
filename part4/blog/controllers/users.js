@@ -5,7 +5,7 @@ import User from '../models/user.js';
 const routerUsers = express.Router();
 
 routerUsers.get('/', async (request, response) => {
-  const users = await User.find({});
+  const users = await User.find({}).populate('blogs');
 
   response.json(users);
 });
