@@ -1,9 +1,16 @@
 import mongoose from 'mongoose';
 
 const schemaUser = mongoose.Schema({
-  username: String,
+  username: {
+    type: String,
+    minLength: 3,
+    required: true,
+  },
   name: String,
-  passwordHash: String,
+  passwordHash: {
+    type: String,
+    required: true,
+  },
 });
 
 schemaUser.set('toJSON', {
