@@ -8,6 +8,7 @@ import { blogsInitial, blogsInDb, getANonExistingId } from './helperTests';
 const api = supertest(app);
 
 let tokenValid;
+let tokenValidOther;
 beforeAll(async () => {
   await User.deleteMany({});
 
@@ -23,8 +24,13 @@ beforeAll(async () => {
   };
 
   await api.post('/api/users').send(userNew);
+  await api.post('/api/users').send({ ...userNew, username: 'admin2' });
   const response = await api.post('/api/login').send(userLogin);
+  const response2 = await api
+    .post('/api/login')
+    .send({ ...userLogin, username: 'admin2' });
   tokenValid = `bearer ${response.body.token}`;
+  tokenValidOther = `bearer ${response2.body.token}`;
 });
 
 beforeEach(async () => {
@@ -183,17 +189,65 @@ describe('Addition of a note', () => {
 });
 
 describe('Deletion of a note', () => {
-  test('succeeds with 204 if valid id', async () => {
+  test('succeeds with 204 if both id & token valid', async () => {
     const blogsAtStart = await blogsInDb();
-    const blogToDelete = blogsAtStart[0];
 
-    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+    const blogToDelete = {
+      author: 'Author 3',
+      title: 'Title 3',
+      url: 'url 3',
+      upvotes: 3,
+    };
+
+    const response = await api
+      .post('/api/blogs')
+      .set('Authorization', tokenValid)
+      .send(blogToDelete);
+
+    await api
+      .delete(`/api/blogs/${response.body.id}`)
+      .set('Authorization', tokenValid)
+      .expect(204);
 
     const blogsAtEnd = await blogsInDb();
-    expect(blogsAtEnd).toHaveLength(blogsInitial.length - 1);
+    expect(blogsAtEnd).toHaveLength(blogsAtStart.length);
 
     const blogsFound = await Blog.find(blogToDelete);
     expect(blogsFound).toHaveLength(0);
+  });
+
+  test('fails with 401 if token invalid or not the owner', async () => {
+    const blogsAtStart = await blogsInDb();
+
+    const blogToDelete = {
+      author: 'Author 3',
+      title: 'Title 3',
+      url: 'url 3',
+      upvotes: 3,
+    };
+
+    const response = await api
+      .post('/api/blogs')
+      .set('Authorization', tokenValid)
+      .send(blogToDelete);
+
+    await api.delete(`/api/blogs/${response.body.id}`).expect(401);
+
+    await api
+      .delete(`/api/blogs/${response.body.id}`)
+      .set('Authorization', 'bearer invalidToken')
+      .expect(401);
+
+    await api
+      .delete(`/api/blogs/${response.body.id}`)
+      .set('Authorization', tokenValidOther)
+      .expect(401);
+
+    const blogsAtEnd = await blogsInDb();
+    expect(blogsAtEnd).toHaveLength(blogsAtStart.length + 1);
+
+    const blogsFound = await Blog.find(blogToDelete);
+    expect(blogsFound).toHaveLength(1);
   });
 });
 
