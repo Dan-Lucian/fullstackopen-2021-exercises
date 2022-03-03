@@ -180,7 +180,7 @@ describe('Addition of a blog', () => {
 
     await api
       .post('/api/blogs')
-      .set('Auhtorization', tokenValid)
+      .set('Authorization', tokenValid)
       .send(blogToAdd)
       .expect(400);
 
