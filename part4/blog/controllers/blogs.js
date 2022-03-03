@@ -59,6 +59,8 @@ routerBlogs.delete(
     }
 
     await Blog.findByIdAndDelete(request.params.id);
+    user.blogs = user.blogs.filter((b) => b.toString() !== request.params.id);
+    await user.save();
     response.status(204).end();
   }
 );
