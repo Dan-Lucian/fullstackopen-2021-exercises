@@ -7,6 +7,7 @@ import logger from './utils/logger.js';
 import middleware from './utils/middleware.js';
 import routerBlogs from './controllers/blogs.js';
 import routerUsers from './controllers/users.js';
+import routerLogin from './controllers/login.js';
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use(express.static('build'));
 app.use(express.json());
 app.use(middleware.loggerRequest);
 
+app.use('/api/login', routerLogin);
 app.use('/api/users', routerUsers);
 app.use('/api/blogs', routerBlogs);
 

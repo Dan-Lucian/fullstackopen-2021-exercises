@@ -8,4 +8,6 @@ const MONGODB_URI =
     ? process.env.TEST_MONGODB_URI
     : process.env.MONGODB_URI;
 
-export { PORT, MONGODB_URI };
+const SECRET = process.env.SECRET;
+
+export { PORT, MONGODB_URI, SECRET };

@@ -25,3 +25,12 @@ Content-Type: application/json
   "blogs": []
 }
 ###
+
+POST  http://localhost:8000/api/login
+Content-Type: application/json
+
+{
+  "username": "admin 2",
+  "password": "admin"
+}
+###
