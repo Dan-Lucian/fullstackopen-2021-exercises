@@ -24,6 +24,7 @@ app.use(cors());
 app.use(express.static('build'));
 app.use(express.json());
 app.use(middleware.loggerRequest);
+app.use(middleware.extractorToken);
 
 app.use('/api/login', routerLogin);
 app.use('/api/users', routerUsers);

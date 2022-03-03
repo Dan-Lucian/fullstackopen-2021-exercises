@@ -6,14 +6,6 @@ import { SECRET } from '../utils/config.js';
 
 const routerBlogs = express.Router();
 
-const getTokenFrom = (request) => {
-  const authorization = request.get('authorization');
-  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-    return authorization.substring(7);
-  }
-  return null;
-};
-
 routerBlogs.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user');
   response.json(blogs);
@@ -35,9 +27,8 @@ routerBlogs.post('/', async (request, response) => {
     return;
   }
 
-  const tokenReceived = getTokenFrom(request);
-  const tokenDecoded = jwt.verify(tokenReceived, SECRET);
-  if (!tokenReceived || !tokenDecoded) {
+  const tokenDecoded = jwt.verify(request.token, SECRET);
+  if (!request.token || !tokenDecoded) {
     response.status(401).send({ error: 'token missing or invalid' });
   }
 
