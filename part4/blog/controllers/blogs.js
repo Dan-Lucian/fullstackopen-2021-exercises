@@ -1,8 +1,18 @@
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import Blog from '../models/blog.js';
 import User from '../models/user.js';
+import { SECRET } from '../utils/config.js';
 
 const routerBlogs = express.Router();
+
+const getTokenFrom = (request) => {
+  const authorization = request.get('authorization');
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    return authorization.substring(7);
+  }
+  return null;
+};
 
 routerBlogs.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user');
@@ -25,7 +35,13 @@ routerBlogs.post('/', async (request, response) => {
     return;
   }
 
-  const userFirst = await User.findOne({});
+  const tokenReceived = getTokenFrom(request);
+  const tokenDecoded = jwt.verify(tokenReceived, SECRET);
+  if (!tokenReceived || !tokenDecoded) {
+    response.status(401).send({ error: 'token missing or invalid' });
+  }
+
+  const user = await User.findById(tokenDecoded.id);
 
   const { author, title, url, upvotes, likes } = request.body;
   const blog = new Blog({
@@ -34,12 +50,12 @@ routerBlogs.post('/', async (request, response) => {
     url,
     upvotes,
     likes,
-    user: userFirst._id,
+    user: user._id,
   });
 
   const blogSaved = await blog.save();
-  userFirst.blogs = userFirst.blogs.concat(blogSaved._id);
-  await userFirst.save();
+  user.blogs = user.blogs.concat(blogSaved._id);
+  await user.save();
 
   response.status(201).json(blogSaved);
 });

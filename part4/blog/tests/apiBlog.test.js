@@ -1,18 +1,35 @@
 import mongoose from 'mongoose';
 import supertest from 'supertest';
 import Blog from '../models/blog.js';
+import User from '../models/user.js';
 import app from '../app.js';
 import { blogsInitial, blogsInDb, getANonExistingId } from './helperTests';
 
 const api = supertest(app);
 
+let tokenValid;
+beforeAll(async () => {
+  await User.deleteMany({});
+
+  const userNew = {
+    username: 'admin',
+    name: 'Dan',
+    password: 'admin',
+  };
+
+  const userLogin = {
+    username: 'admin',
+    password: 'admin',
+  };
+
+  await api.post('/api/users').send(userNew);
+  const response = await api.post('/api/login').send(userLogin);
+  tokenValid = `bearer ${response.body.token}`;
+});
+
 beforeEach(async () => {
   await Blog.deleteMany({});
-
-  const arrayBlogs = blogsInitial.map((blog) => new Blog(blog));
-  const arrayPromises = arrayBlogs.map((blog) => blog.save());
-
-  await Promise.all(arrayPromises);
+  await Blog.insertMany(blogsInitial);
 });
 
 describe('when there is initially some notes saved', () => {
@@ -75,7 +92,7 @@ describe('Viewing a specific blog', () => {
 });
 
 describe('Addition of a note', () => {
-  test('succeeds with valid data', async () => {
+  test('succeeds if token & data valid', async () => {
     const blogToAdd = {
       author: 'Author 3',
       title: 'Title 3',
@@ -85,6 +102,7 @@ describe('Addition of a note', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', tokenValid)
       .send(blogToAdd)
       .expect(201)
       .expect('Content-Type', /application\/json/);
@@ -92,17 +110,13 @@ describe('Addition of a note', () => {
     const blogsAtEnd = await blogsInDb();
     expect(blogsAtEnd).toHaveLength(blogsInitial.length + 1);
 
-    const authorsBlogs = blogsAtEnd.map((blog) => blog.author);
-    expect(authorsBlogs).toContain(blogToAdd.author);
-
-    const titlesBlogs = blogsAtEnd.map((blog) => blog.title);
-    expect(titlesBlogs).toContain(blogToAdd.title);
-
-    const urlsBlogs = blogsAtEnd.map((blog) => blog.url);
-    expect(urlsBlogs).toContain(blogToAdd.url);
-
-    const upvotesBlogs = blogsAtEnd.map((blog) => blog.upvotes);
-    expect(upvotesBlogs).toContain(blogToAdd.upvotes);
+    const user = await User.findOne(blogToAdd);
+    const blogInDb = await Blog.findOne(blogToAdd);
+    expect(blogInDb.user).toEqual(user._id);
+    expect(blogInDb.author).toEqual(blogToAdd.author);
+    expect(blogInDb.title).toEqual(blogToAdd.title);
+    expect(blogInDb.url).toEqual(blogToAdd.url);
+    expect(blogInDb.upvotes).toEqual(blogToAdd.upvotes);
   });
 
   test('defaults likes to 0', async () => {
@@ -115,21 +129,56 @@ describe('Addition of a note', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', tokenValid)
       .send(blogToAdd)
       .expect(201)
       .expect('Content-Type', /application\/json/);
 
-    const blogInDb = await Blog.find(blogToAdd);
-    expect(blogInDb[0].likes).toBe(0);
+    const blogInDb = await Blog.findOne(blogToAdd);
+    expect(blogInDb.likes).toBe(0);
+  });
+
+  test('fails with 401 if token missing or invalid', async () => {
+    const blogsAtStart = await blogsInDb();
+
+    const blogToAdd = {
+      author: 'Author 3',
+      title: 'Title 3',
+      url: 'url 3',
+      upvotes: 3,
+    };
+
+    await api
+      .post('/api/blogs')
+      .set('Authorization', 'bearer tokenInvalid')
+      .send(blogToAdd)
+      .expect(401)
+      .expect('Content-Type', /application\/json/);
+
+    await api
+      .post('/api/blogs')
+      .send(blogToAdd)
+      .expect(401)
+      .expect('Content-Type', /application\/json/);
+
+    expect(blogsAtStart).toHaveLength(blogsInitial.length);
   });
 
   test('fails with 400 if data invalid', async () => {
+    const blogsAtStart = await blogsInDb();
+
     const blogToAdd = {
       author: 'Author 3',
       upvotes: 3,
     };
 
-    await api.post('/api/blogs').send(blogToAdd).expect(400);
+    await api
+      .post('/api/blogs')
+      .set('Auhtorization', tokenValid)
+      .send(blogToAdd)
+      .expect(400);
+
+    expect(blogsAtStart).toHaveLength(blogsInitial.length);
   });
 });
 

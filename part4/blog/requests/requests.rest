@@ -1,14 +1,18 @@
 GET http://localhost:8000/api/blogs
 ###
 
+GET http://localhost:8000/api/users
+###
+
 GET http://localhost:8000/api/blogs/62190cc2cbe16c0b30916ca0
 ###
 
 POST  http://localhost:8000/api/blogs
 Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWQiOiI2MjIxMjI1NjBiZWJhODFjY2UzMzU2MjIiLCJpYXQiOjE2NDYzMzg4MTd9.jjwrODVS40DtmmXLpJPmgNxIBJ4MHZ61r216w_Essyj
 
 {
-  "author": "author 3",
+  "author": "author 5",
   "title": "title",
   "url": "text",
   "upvotes": 3
@@ -30,7 +34,7 @@ POST  http://localhost:8000/api/login
 Content-Type: application/json
 
 {
-  "username": "admin 2",
+  "username": "admin",
   "password": "admin"
 }
 ###

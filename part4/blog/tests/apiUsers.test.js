@@ -27,7 +27,7 @@ describe('When there is already a user in the db', () => {
   }, 10000);
 
   describe('Creating a new user', () => {
-    test('succeeds with 201 if data valid', async () => {
+    test.only('succeeds with 201 if data valid', async () => {
       const usersAtStart = await usersInDb();
 
       const userNew = {

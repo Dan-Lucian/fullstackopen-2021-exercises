@@ -29,9 +29,24 @@ const getANonExistingId = async () => {
   return blog._id.toString();
 };
 
+const usersInitial = [
+  {
+    username: 'admin',
+    name: 'dan',
+    passwordHash:
+      '$2b$10$xhvCoPSN7YYNWzy.wh784.W2CoDjSli/13Bk4KOqOY5/Ikfdq40Ky',
+  },
+  {
+    username: 'admin2',
+    name: 'dan2',
+    passwordHash:
+      '$2b$10$xhvCoPSN7YYNWzy.wh784.W2CoDjSli/13Bk4KOqOY5/Ikfdq40Ky',
+  },
+];
+
 const usersInDb = async () => {
   const users = await User.find({});
   return users.map((user) => user.toJSON());
 };
 
-export { blogsInitial, blogsInDb, getANonExistingId, usersInDb };
+export { blogsInitial, blogsInDb, getANonExistingId, usersInDb, usersInitial };

@@ -1,10 +1,8 @@
 import supertest from 'supertest';
-import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
 import app from '../app.js';
-import { usersInDb } from './helperTests.js';
 import { SECRET } from '../utils/config.js';
 
 const api = supertest(app);
@@ -23,7 +21,7 @@ describe('Login', () => {
     await user.save();
   });
 
-  test('succeedes by returning a jwt if valid login data', async () => {
+  test.only('succeedes by returning a jwt if valid login data', async () => {
     const userToLogin = {
       username: 'admin',
       password: 'admin',
