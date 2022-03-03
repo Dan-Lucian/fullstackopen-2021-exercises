@@ -6,6 +6,7 @@ import { MONGODB_URI } from './utils/config.js';
 import logger from './utils/logger.js';
 import middleware from './utils/middleware.js';
 import routerBlogs from './controllers/blogs.js';
+import routerUsers from './controllers/users.js';
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use(express.static('build'));
 app.use(express.json());
 app.use(middleware.loggerRequest);
 
+app.use('/api/users', routerUsers);
 app.use('/api/blogs', routerBlogs);
 
 app.use(middleware.endpointUknown);

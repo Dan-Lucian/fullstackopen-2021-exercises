@@ -1,4 +1,5 @@
-import Blog from '../models/blog';
+import Blog from '../models/blog.js';
+import User from '../models/user.js';
 
 const blogsInitial = [
   {
@@ -28,4 +29,9 @@ const getANonExistingId = async () => {
   return blog._id.toString();
 };
 
-export { blogsInitial, blogsInDb, getANonExistingId };
+const usersInDb = async () => {
+  const users = await User.find({});
+  return users.map((user) => user.toJSON());
+};
+
+export { blogsInitial, blogsInDb, getANonExistingId, usersInDb };

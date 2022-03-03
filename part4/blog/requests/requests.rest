@@ -13,3 +13,14 @@ Content-Type: application/json
   "url": "text",
   "upvotes": 3
 }
+###
+
+POST  http://localhost:8000/api/users
+Content-Type: application/json
+
+{
+  "username": "admin3",
+  "name": "Dan",
+  "password": "admin"
+}
+###
