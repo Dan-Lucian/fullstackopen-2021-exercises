@@ -229,7 +229,34 @@ describe('Deletion of a blog', () => {
     expect(blogsFound).toHaveLength(0);
   });
 
-  test('fails with 401 if token invalid or not the owner', async () => {
+  test('fails with 401 if token invalid', async () => {
+    const blogsAtStart = await blogsInDb();
+
+    const blogToDelete = {
+      author: 'Author 3',
+      title: 'Title 3',
+      url: 'url 3',
+      upvotes: 3,
+    };
+
+    const response = await api
+      .post('/api/blogs')
+      .set('Authorization', tokenValid)
+      .send(blogToDelete);
+
+    await api
+      .delete(`/api/blogs/${response.body.id}`)
+      .set('Authorization', 'bearer invalidToken')
+      .expect(401);
+
+    const blogsAtEnd = await blogsInDb();
+    expect(blogsAtEnd).toHaveLength(blogsAtStart.length + 1);
+
+    const blogsFound = await Blog.find(blogToDelete);
+    expect(blogsFound).toHaveLength(1);
+  });
+
+  test('fails with 401 if token missing', async () => {
     const blogsAtStart = await blogsInDb();
 
     const blogToDelete = {
@@ -246,10 +273,27 @@ describe('Deletion of a blog', () => {
 
     await api.delete(`/api/blogs/${response.body.id}`).expect(401);
 
-    await api
-      .delete(`/api/blogs/${response.body.id}`)
-      .set('Authorization', 'bearer invalidToken')
-      .expect(401);
+    const blogsAtEnd = await blogsInDb();
+    expect(blogsAtEnd).toHaveLength(blogsAtStart.length + 1);
+
+    const blogsFound = await Blog.find(blogToDelete);
+    expect(blogsFound).toHaveLength(1);
+  });
+
+  test('fails with 401 if token not the owner', async () => {
+    const blogsAtStart = await blogsInDb();
+
+    const blogToDelete = {
+      author: 'Author 3',
+      title: 'Title 3',
+      url: 'url 3',
+      upvotes: 3,
+    };
+
+    const response = await api
+      .post('/api/blogs')
+      .set('Authorization', tokenValid)
+      .send(blogToDelete);
 
     await api
       .delete(`/api/blogs/${response.body.id}`)
