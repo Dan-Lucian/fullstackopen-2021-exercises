@@ -111,7 +111,6 @@ describe('When there is already a user in the db', () => {
     test('fails with 400 if username missing', async () => {
       const usersAtStart = await usersInDb();
       const userNew = {
-        username: '',
         name: 'Dan',
         password: 'password',
       };
@@ -153,7 +152,6 @@ describe('When there is already a user in the db', () => {
       const userNew = {
         username: 'admin',
         name: 'Dan',
-        password: '',
       };
 
       const response = await api
