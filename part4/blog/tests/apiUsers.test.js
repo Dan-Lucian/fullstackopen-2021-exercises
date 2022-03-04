@@ -11,11 +11,8 @@ describe('When there is already a user in the db', () => {
   beforeEach(async () => {
     await User.deleteMany({});
 
-    const user = new User({
-      username: 'root',
-      name: 'admin',
-      passwordHash: 'something',
-    });
+    const passwordHash = await bcrypt.hash('admin', 10);
+    const user = new User({ username: 'admin', passwordHash });
 
     await user.save();
   });
@@ -74,9 +71,9 @@ describe('When there is already a user in the db', () => {
     test('fails with 400 if username already in db', async () => {
       const usersAtStart = await usersInDb();
       const userNew = {
-        username: 'root',
+        username: 'admin',
         name: 'Dan',
-        password: 'password',
+        password: 'admin',
       };
 
       const response = await api
