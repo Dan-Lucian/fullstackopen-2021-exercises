@@ -39,7 +39,7 @@ describe('Login', () => {
     expect(jwtDecoded.username).toBe(userToLogin.username);
   });
 
-  test('fails with 400 and error message if username not found', async () => {
+  test('fails with 401 and error message if username not found', async () => {
     const userToLogin = {
       username: 'wrongLogin',
       password: 'admin',
@@ -48,14 +48,14 @@ describe('Login', () => {
     const response = await api
       .post('/api/login')
       .send(userToLogin)
-      .expect(400)
+      .expect(401)
       .expect('Content-Type', /application\/json/);
 
     expect(response.body.error).toBe('invalid username or password');
     expect(response.body.token).toBeUndefined();
   });
 
-  test('fails with 400 and error message if password is wrong', async () => {
+  test('fails with 401 and error message if password is wrong', async () => {
     const userToLogin = {
       username: 'admin',
       password: 'wrongPassword',
@@ -64,7 +64,7 @@ describe('Login', () => {
     const response = await api
       .post('/api/login')
       .send(userToLogin)
-      .expect(400)
+      .expect(401)
       .expect('Content-Type', /application\/json/);
 
     expect(response.body.error).toBe('invalid username or password');
