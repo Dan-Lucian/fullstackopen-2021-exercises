@@ -13,11 +13,7 @@ routerUsers.get('/', async (request, response) => {
 routerUsers.post('/', async (request, response) => {
   const { username, name, password } = request.body;
 
-  if (!password) {
-    return response.status(400).json({ error: 'password is missing' });
-  }
-
-  if (password.length < 3) {
+  if (!password || password.length < 3) {
     return response.status(400).json({
       error: 'password too short, it has to be at least 3 characters',
     });
