@@ -16,7 +16,7 @@ const endpointUknown = (request, response) => {
 };
 
 const handlerError = (error, request, response, next) => {
-  logger.error(error.message);
+  logger.error(`${error.name}: ${error.message}`);
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' });
@@ -33,24 +33,13 @@ const handlerError = (error, request, response, next) => {
   next(error);
 };
 
-const extractorToken = (request, response, next) => {
-  const authorization = request.get('authorization');
-
-  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-    request.token = authorization.substring(7);
-  } else {
-    request.token = null;
-  }
-
-  next();
-};
-
 const extractorUser = async (request, response, next) => {
-  const tokenDecoded = jwt.verify(request.token, SECRET);
-  if (!request.token || !tokenDecoded) {
-    request.user = null;
-  } else {
-    request.user = await User.findById(tokenDecoded.id);
+  const authorization = request.get('authorization');
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    const tokenDecoded = jwt.verify(authorization.substring(7), SECRET);
+    if (tokenDecoded) {
+      request.user = await User.findById(tokenDecoded.id);
+    }
   }
 
   next();
@@ -60,7 +49,6 @@ const middleware = {
   loggerRequest,
   endpointUknown,
   handlerError,
-  extractorToken,
   extractorUser,
 };
 

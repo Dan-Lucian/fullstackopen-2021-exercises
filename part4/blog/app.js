@@ -24,11 +24,10 @@ app.use(cors());
 app.use(express.static('build'));
 app.use(express.json());
 app.use(middleware.loggerRequest);
-app.use(middleware.extractorToken);
 
 app.use('/api/login', routerLogin);
 app.use('/api/users', routerUsers);
-app.use('/api/blogs', routerBlogs);
+app.use('/api/blogs', middleware.extractorUser, routerBlogs);
 
 app.use(middleware.endpointUknown);
 app.use(middleware.handlerError);

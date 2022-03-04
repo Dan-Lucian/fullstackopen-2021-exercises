@@ -144,7 +144,7 @@ describe('Addition of a blog', () => {
     expect(blogInDb.likes).toBe(0);
   });
 
-  test('fails with 401 if token missing or invalid', async () => {
+  test('fails with 401 if token invalid', async () => {
     const blogsAtStart = await blogsInDb();
 
     const blogToAdd = {
@@ -160,6 +160,19 @@ describe('Addition of a blog', () => {
       .send(blogToAdd)
       .expect(401)
       .expect('Content-Type', /application\/json/);
+
+    expect(blogsAtStart).toHaveLength(blogsInitial.length);
+  });
+
+  test('fails with 401 if token missing', async () => {
+    const blogsAtStart = await blogsInDb();
+
+    const blogToAdd = {
+      author: 'Author 3',
+      title: 'Title 3',
+      url: 'url 3',
+      upvotes: 3,
+    };
 
     await api
       .post('/api/blogs')
