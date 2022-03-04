@@ -5,6 +5,7 @@ const routerBlogs = express.Router();
 
 routerBlogs.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user');
+
   response.json(blogs);
 });
 
@@ -24,15 +25,15 @@ routerBlogs.post('/', async (request, response) => {
   }
 
   const { user } = request;
-
   const { author, title, url, upvotes, likes } = request.body;
+
   const blog = new Blog({
     author,
     title,
     url,
     upvotes,
     likes,
-    user: user._id,
+    user: user.id,
   });
 
   const blogSaved = await blog.save();
