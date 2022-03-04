@@ -22,6 +22,7 @@ schemaBlog.set('toJSON', {
   transform: (document, objectReturned) => {
     objectReturned.id = objectReturned._id.toString();
     delete objectReturned._id;
+    delete objectReturned.__v;
   },
 });
 
