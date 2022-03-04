@@ -306,6 +306,18 @@ describe('Deletion of a blog', () => {
     const blogsFound = await Blog.find(blogToDelete);
     expect(blogsFound).toHaveLength(1);
   });
+
+  test('fails with 404 if blog not found', async () => {
+    const blogsAtStart = await blogsInDb();
+
+    await api
+      .delete(`/api/blogs/6221e073de1529e2b5c73057`)
+      .set('Authorization', tokenValid)
+      .expect(404);
+
+    const blogsAtEnd = await blogsInDb();
+    expect(blogsAtEnd).toHaveLength(blogsAtStart.length);
+  });
 });
 
 describe('Updating of a blog', () => {

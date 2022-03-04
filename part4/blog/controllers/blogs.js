@@ -37,6 +37,7 @@ routerBlogs.post('/', async (request, response) => {
   });
 
   const blogSaved = await blog.save();
+
   user.blogs = user.blogs.concat(blogSaved._id);
   await user.save();
 
@@ -50,14 +51,22 @@ routerBlogs.delete('/:id', async (request, response) => {
 
   const { user } = request;
 
-  const blog = await Blog.findById(request.params.id);
-  if (blog.user.toString() !== user._id.toString()) {
-    return response.status(401).end();
+  const blogToDelete = await Blog.findById(request.params.id);
+  if (!blogToDelete) {
+    return response.status(404).end();
+  }
+
+  if (blogToDelete.user && blogToDelete.user.toString() !== user.id) {
+    return response
+      .status(401)
+      .json({ error: 'only creator can delete a blog' });
   }
 
   await Blog.findByIdAndDelete(request.params.id);
+
   user.blogs = user.blogs.filter((b) => b.toString() !== request.params.id);
   await user.save();
+
   response.status(204).end();
 });
 
