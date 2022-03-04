@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import supertest from 'supertest';
+import bcrypt from 'bcrypt';
 import Blog from '../models/blog.js';
 import User from '../models/user.js';
 import app from '../app.js';
@@ -12,23 +13,20 @@ let tokenValidOther;
 beforeAll(async () => {
   await User.deleteMany({});
 
-  const userNew = {
-    username: 'admin',
-    name: 'Dan',
-    password: 'admin',
-  };
+  const passwordHash = await bcrypt.hash('admin', 10);
+  const user = new User({ username: 'admin', passwordHash });
+  const user2 = new User({ username: 'admin2', passwordHash });
 
-  const userLogin = {
-    username: 'admin',
-    password: 'admin',
-  };
+  await user.save();
+  await user2.save();
 
-  await api.post('/api/users').send(userNew);
-  await api.post('/api/users').send({ ...userNew, username: 'admin2' });
-  const response = await api.post('/api/login').send(userLogin);
+  const response = await api
+    .post('/api/login')
+    .send({ username: 'admin', password: 'admin' });
   const response2 = await api
     .post('/api/login')
-    .send({ ...userLogin, username: 'admin2' });
+    .send({ username: 'admin2', password: 'admin' });
+
   tokenValid = `bearer ${response.body.token}`;
   tokenValidOther = `bearer ${response2.body.token}`;
 });
