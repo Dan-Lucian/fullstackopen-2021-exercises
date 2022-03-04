@@ -2,8 +2,14 @@ import mongoose from 'mongoose';
 
 const schemaBlog = new mongoose.Schema({
   author: String,
-  title: String,
-  url: String,
+  title: {
+    type: String,
+    required: true,
+  },
+  url: {
+    type: String,
+    required: true,
+  },
   upvotes: Number,
   likes: { type: Number, default: 0 },
   user: {

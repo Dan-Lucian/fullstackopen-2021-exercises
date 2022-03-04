@@ -19,11 +19,6 @@ routerBlogs.get('/:id', async (request, response, next) => {
 });
 
 routerBlogs.post('/', async (request, response) => {
-  if (!request.body.url && !request.body.title) {
-    response.status(400).end();
-    return;
-  }
-
   if (!request.user) {
     return response.status(401).json({ error: 'token missing' });
   }

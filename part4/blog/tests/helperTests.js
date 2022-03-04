@@ -22,7 +22,12 @@ const blogsInDb = async () => {
 };
 
 const getANonExistingId = async () => {
-  const blog = new Blog({ content: 'willremovethissoon', date: new Date() });
+  const blog = new Blog({
+    author: 'Author temporary',
+    title: 'Title temporary',
+    url: 'url temporary',
+    upvotes: 0,
+  });
   await blog.save();
   await blog.remove();
 
