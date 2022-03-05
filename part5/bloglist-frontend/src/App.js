@@ -36,7 +36,7 @@ const App = () => {
 
   return (
     <div>
-      {user && <Blogs blogs={blogs} setUser={setUser} />}
+      {user && <Blogs blogs={blogs} setUser={setUser} nameUser={user.name} />}
       {!user && (
         <Login
           username={username}
