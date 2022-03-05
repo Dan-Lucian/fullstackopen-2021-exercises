@@ -11,6 +11,7 @@ import loginService from './services/login';
 import Blogs from './components/Blogs';
 import Login from './components/Login';
 import FormCreate from './components/FormCreate';
+import Notification from './components/Notification';
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
@@ -20,6 +21,7 @@ const App = () => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [url, setUrl] = useState('');
+  const [messageNotification, setMessageNotification] = useState(null);
 
   useEffect(() => {
     blogService.getAll().then((blogReceived) => setBlogs(blogReceived));
@@ -34,7 +36,10 @@ const App = () => {
       setUsername('');
       setPassword('');
     } catch (error) {
-      console.error(`${error.name}: ${error.message}`);
+      setMessageNotification(`wrong username or password`);
+      setTimeout(() => {
+        setMessageNotification(null);
+      }, 5000);
     }
   };
 
@@ -46,34 +51,46 @@ const App = () => {
       setTitle('');
       setAuthor('');
       setUrl('');
+      setMessageNotification(
+        `a new blog ${blogReturned.title} by ${blogReturned.author} added`
+      );
+      setTimeout(() => {
+        setMessageNotification(null);
+      }, 5000);
     } catch (error) {
-      console.error(`${error.name}: ${error.message}`);
+      setMessageNotification(`${error.name}: ${error.message}`);
+      setTimeout(() => {
+        setMessageNotification(null);
+      }, 5000);
     }
   };
 
-  if (!user)
-    return (
-      <Login
-        username={username}
-        setUsername={setUsername}
-        password={password}
-        setPassword={setPassword}
-        handleLogin={handleLogin}
-      />
-    );
-
   return (
     <div>
-      <Blogs blogs={blogs} setUser={setUser} nameUser={user.name} />
-      <FormCreate
-        title={title}
-        setTitle={setTitle}
-        author={author}
-        setAuthor={setAuthor}
-        url={url}
-        setUrl={setUrl}
-        handleCreateNote={handleCreateNote}
-      />
+      <Notification message={messageNotification} />
+
+      {!user ? (
+        <Login
+          username={username}
+          setUsername={setUsername}
+          password={password}
+          setPassword={setPassword}
+          handleLogin={handleLogin}
+        />
+      ) : (
+        <>
+          <Blogs blogs={blogs} setUser={setUser} nameUser={user.name} />
+          <FormCreate
+            title={title}
+            setTitle={setTitle}
+            author={author}
+            setAuthor={setAuthor}
+            url={url}
+            setUrl={setUrl}
+            handleCreateNote={handleCreateNote}
+          />
+        </>
+      )}
     </div>
   );
 };
