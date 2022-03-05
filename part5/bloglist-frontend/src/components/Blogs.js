@@ -1,12 +1,13 @@
 /* eslint-disable react/prop-types */
 import Blog from './Blog';
 
-function Blogs(props) {
-  const { blogs } = props;
-
+function Blogs({ blogs, setUser }) {
   return (
     <div>
       <h2>blogs</h2>
+      <button onClick={() => setUser(null)} type="button">
+        logout
+      </button>
       {blogs.map((blog) => (
         <Blog key={blog.id} blog={blog} />
       ))}

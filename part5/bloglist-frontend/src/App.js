@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 
+// shared hooks
+import { useLocalStorage } from './hooks/useLocalStorage';
+
 // requesting functions
 import blogService from './services/blogs';
 import loginService from './services/login';
@@ -12,7 +15,7 @@ const App = () => {
   const [blogs, setBlogs] = useState([]);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useLocalStorage('userLogged');
 
   useEffect(() => {
     blogService.getAll().then((blogReceived) => setBlogs(blogReceived));
@@ -33,8 +36,8 @@ const App = () => {
 
   return (
     <div>
-      {user !== null && <Blogs blogs={blogs} />}
-      {user === null && (
+      {user && <Blogs blogs={blogs} setUser={setUser} />}
+      {!user && (
         <Login
           username={username}
           setUsername={setUsername}
