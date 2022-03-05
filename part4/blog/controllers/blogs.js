@@ -23,8 +23,8 @@ routerBlogs.get('/:id', async (request, response, next) => {
 });
 
 routerBlogs.post('/', middleware.extractorUser, async (request, response) => {
-  if (!request.body.url && !request.body.title) {
-    response.status(400).end();
+  if (!request.body.url || !request.body.title) {
+    response.status(400).json({ error: 'missing title or url' });
     return;
   }
 
@@ -37,7 +37,7 @@ routerBlogs.post('/', middleware.extractorUser, async (request, response) => {
     url,
     upvotes,
     likes,
-    user: user._id,
+    user: user.id,
   });
 
   const blogSaved = await blog.save();
@@ -54,7 +54,7 @@ routerBlogs.delete(
     const { user } = request;
 
     const blog = await Blog.findById(request.params.id);
-    if (blog.user.toString() !== user._id.toString()) {
+    if (blog.user.toString() !== user.id) {
       return response.status(401).end();
     }
 

@@ -178,10 +178,21 @@ describe('Addition of a blog', () => {
       upvotes: 3,
     };
 
+    const blogToAdd2 = {
+      upvotes: 3,
+      url: 'url',
+    };
+
     await api
       .post('/api/blogs')
       .set('Authorization', tokenValid)
       .send(blogToAdd)
+      .expect(400);
+
+    await api
+      .post('/api/blogs')
+      .set('Authorization', tokenValid)
+      .send(blogToAdd2)
       .expect(400);
 
     expect(blogsAtStart).toHaveLength(blogsInitial.length);
